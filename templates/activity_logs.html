@@ -1,0 +1,55 @@
+<div class="logs-container">
+    <h2>Журнал активності</h2>
+    <form method="GET" class="filter-form">
+        <label for="email">Фільтр за email:</label>
+        <input type="text" name="email" value="<?php echo htmlspecialchars($email_filter); ?>">
+        
+        <label for="action">Фільтр за дією:</label>
+        <select name="action">
+            <option value="">Усі дії</option>
+            <option value="login" <?php echo $action_filter === 'login' ? 'selected' : ''; ?>>Вхід</option>
+            <option value="logout" <?php echo $action_filter === 'logout' ? 'selected' : ''; ?>>Вихід</option>
+            <option value="update_profile" <?php echo $action_filter === 'update_profile' ? 'selected' : ''; ?>>Оновлення профілю</option>
+            <option value="change_password" <?php echo $action_filter === 'change_password' ? 'selected' : ''; ?>>Зміна пароля</option>
+        </select>
+        
+        <button type="submit">Фільтрувати</button>
+    </form>
+    <table class="logs-table">
+        <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Дія</th>
+            <th>Час</th>
+        </tr>
+        <?php if (empty($logs)): ?>
+            <tr>
+                <td colspan="4">Записи відсутні</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($logs as $log): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($log['id']); ?></td>
+                    <td><?php echo htmlspecialchars($log['email']); ?></td>
+                    <td><?php echo htmlspecialchars($log['action']); ?></td>
+                    <td><?php echo htmlspecialchars($log['timestamp']); ?></td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </table>
+    <div class="pagination">
+        <?php if ($total_pages > 1): ?>
+            <?php if ($page > 1): ?>
+                <a href="?page=1<?php echo $email_filter ? '&email=' . urlencode($email_filter) : ''; ?><?php echo $action_filter ? '&action=' . urlencode($action_filter) : ''; ?>">« Перша</a>
+                <a href="?page=<?php echo $page - 1; ?><?php echo $email_filter ? '&email=' . urlencode($email_filter) : ''; ?><?php echo $action_filter ? '&action=' . urlencode($action_filter) : ''; ?>">< Попередня</a>
+            <?php endif; ?>
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <a href="?page=<?php echo $i; ?><?php echo $email_filter ? '&email=' . urlencode($email_filter) : ''; ?><?php echo $action_filter ? '&action=' . urlencode($action_filter) : ''; ?>" <?php echo $i == $page ? 'class="active"' : ''; ?>><?php echo $i; ?></a>
+            <?php endfor; ?>
+            <?php if ($page < $total_pages): ?>
+                <a href="?page=<?php echo $page + 1; ?><?php echo $email_filter ? '&email=' . urlencode($email_filter) : ''; ?><?php echo $action_filter ? '&action=' . urlencode($action_filter) : ''; ?>">Наступна ></a>
+                <a href="?page=<?php echo $total_pages; ?><?php echo $email_filter ? '&email=' . urlencode($email_filter) : ''; ?><?php echo $action_filter ? '&action=' . urlencode($action_filter) : ''; ?>">Остання »</a>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+</div>

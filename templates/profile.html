@@ -1,0 +1,26 @@
+<div>
+    <h2>Мій профіль</h2>
+    <?php if (!empty($message)): ?>
+        <p class="<?php echo strpos($message, 'Помилка') === false ? 'success' : 'error'; ?>">
+            <?php echo htmlspecialchars($message); ?>
+        </p>
+    <?php endif; ?>
+    <form method="POST">
+        <label for="email">Email:</label>
+        <input type="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" disabled>
+        
+        <label for="role">Роль:</label>
+        <input type="text" name="role" value="<?php echo htmlspecialchars($user['role']); ?>" disabled>
+        
+        <label for="name">Ім'я:</label>
+        <input type="text" name="name" value="<?php echo htmlspecialchars($user['name'] ?? ''); ?>">
+        
+        <label for="phone">Телефон:</label>
+        <input type="text" name="phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>">
+        
+        <label for="birth_date">Дата народження:</label>
+        <input type="date" name="birth_date" value="<?php echo htmlspecialchars($user['birth_date'] ?? ''); ?>">
+        
+        <button type="submit">Зберегти</button>
+    </form>
+</div>

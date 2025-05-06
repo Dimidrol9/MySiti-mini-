@@ -1,0 +1,18 @@
+<aside class="sidebar">
+    <h2>Меню</h2>
+    <nav>
+        <ul>
+            <li><a href="home.php">Головна</a></li>
+            <li><a href="profile.php">Мій профіль</a></li>
+            <li><a href="change_password.php">Зміна пароля</a></li>
+            <?php if (isset($_SESSION['role']) && in_array($_SESSION['role'], ['moderator', 'admin'])): ?>
+                <li><a href="users_log.php">Журнал користувачів</a></li>
+                <li><a href="activity_logs.php">Журнал активності</a></li>
+            <?php endif; ?>
+            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                <li><a href="admin_panel.php">Адмін-панель</a></li>
+            <?php endif; ?>
+            <li><a href="logout.php">Вихід</a></li>
+        </ul>
+    </nav>
+</aside>
