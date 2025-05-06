@@ -1,0 +1,32 @@
+<div class="main-container">
+    <h1>Вхід до системи</h1>
+    
+    <?php if(isset($_SESSION['success'])): ?>
+        <div class="success">
+            <?php echo htmlspecialchars($_SESSION['success']); ?>
+        </div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
+    
+    <?php if(isset($error_message) && $error_message): ?>
+        <div class="error">
+            <?php echo htmlspecialchars($error_message); ?>
+        </div>
+    <?php endif; ?>
+    
+    <form id="loginForm" action="login.php" method="POST">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Введіть ваш email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Пароль</label>
+            <input type="password" id="password" name="password" placeholder="Введіть ваш пароль" required>
+        </div>
+        <button type="submit">Увійти</button>
+    </form>
+    
+    <div class="register-link">
+        <p>Не маєте облікового запису? <a href="register.php">Зареєструватися</a></p>
+    </div>
+</div>

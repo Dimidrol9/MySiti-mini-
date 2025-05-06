@@ -1,0 +1,63 @@
+<div>
+    <h2>Адмін-панель</h2>
+    <?php if (!empty($message)): ?>
+        <p class="<?php echo strpos($message, 'Помилка') === false && strpos($message, 'уже існує') === false ? 'success' : 'error'; ?>">
+            <?php echo htmlspecialchars($message); ?>
+        </p>
+    <?php endif; ?>
+    
+    <h3>Додати нового користувача</h3>
+    <form method="POST">
+        <input type="hidden" name="add_user" value="1">
+        <label for="email">Email:</label>
+        <input type="email" name="email" required>
+        
+        <label for="password">Пароль:</label>
+        <input type="password" name="password" required>
+        
+        <label for="role">Роль:</label>
+        <select name="role" required>
+            <option value="guest">Гість</option>
+            <option value="moderator">Модератор</option>
+            <option value="admin">Адмін</option>
+        </select>
+        
+        <button type="submit">Додати користувача</button>
+    </form>
+    
+    <h3>Список користувачів</h3>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Роль</th>
+            <th>Дата створення</th>
+            <th>Дії</th>
+        </tr>
+        <?php foreach ($users as $user): ?>
+            <tr>
+                <td><?php echo htmlspecialchars($user['id']); ?></td>
+                <td><?php echo htmlspecialchars($user['email']); ?></td>
+                <td>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="edit_user" value="1">
+                        <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                        <select name="role" onchange="this.form.submit()">
+                            <option value="guest" <?php echo $user['role'] === 'guest' ? 'selected' : ''; ?>>Гість</option>
+                            <option value="moderator" <?php echo $user['role'] === 'moderator' ? 'selected' : ''; ?>>Модератор</option>
+                            <option value="admin" <?php echo $user['role'] === 'admin' ? 'selected' : ''; ?>>Адмін</option>
+                        </select>
+                    </form>
+                </td>
+                <td><?php echo htmlspecialchars($user['created_at']); ?></td>
+                <td>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="delete_user" value="1">
+                        <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                        <button type="submit" class="delete-btn" onclick="return confirm('Ви впевнені, що хочете видалити цього користувача?')">Видалити</button>
+                    </form>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
+</div>

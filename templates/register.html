@@ -1,0 +1,30 @@
+<div class="main-container">
+    <h1>Реєстрація</h1>
+    
+    <?php if(isset($_SESSION['error'])): ?>
+        <div class="error">
+            <?php echo htmlspecialchars($_SESSION['error']); ?>
+        </div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+    
+    <form id="registerForm" action="register_process.php" method="POST">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Введіть ваш email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Пароль</label>
+            <input type="password" id="password" name="password" placeholder="Створіть надійний пароль" required>
+        </div>
+        <div class="form-group">
+            <label for="confirm_password">Підтвердження паролю</label>
+            <input type="password" id="confirm_password" name="confirm_password" placeholder="Підтвердіть ваш пароль" required>
+        </div>
+        <button type="submit">Зареєструватися</button>
+    </form>
+    
+    <div class="login-link">
+        <p>Вже маєте обліковий запис? <a href="index.php">Увійти</a></p>
+    </div>
+</div>
