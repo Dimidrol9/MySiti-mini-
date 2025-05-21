@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php");
+    header("Location: login.php");
     exit;
 }
 
@@ -35,8 +35,6 @@ try {
         </ul>
         <p>Використовуйте бічне меню для навігації по функціях.</p>
     </div>
-    
-    <?php include 'templates/modal.html'; ?>
 
     
 </body>

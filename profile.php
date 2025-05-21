@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php");
+    header("Location: login.php");
     exit;
 }
 
@@ -20,13 +20,20 @@ try {
         $phone = trim($_POST['phone']);
         $birth_date = trim($_POST['birth_date']);
 
-        $stmt = $pdo->prepare("UPDATE users SET name = ?, phone = ?, birth_date = ? WHERE id = ?");
-        $stmt->execute([$name, $phone, $birth_date, $_SESSION['user_id']]);
+        // Перевірка лімітів символів
+        if (mb_strlen($name, 'UTF-8') > 50) {
+            $message = "Ім'я не може перевищувати 50 символів!";
+        } elseif (mb_strlen($phone, 'UTF-8') > 15) {
+            $message = "Номер телефону не може перевищувати 15 символів!";
+        } else {
+            $stmt = $pdo->prepare("UPDATE users SET name = ?, phone = ?, birth_date = ? WHERE id = ?");
+            $stmt->execute([$name, $phone, $birth_date, $_SESSION['user_id']]);
 
-        $stmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action) VALUES (?, 'update_profile')");
-        $stmt->execute([$_SESSION['user_id']]);
+            $stmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action) VALUES (?, 'update_profile')");
+            $stmt->execute([$_SESSION['user_id']]);
 
-        $message = "Профіль успішно оновлено!";
+            $message = "Профіль успішно оновлено!";
+        }
     }
 } catch (PDOException $e) {
     $message = "Помилка: " . $e->getMessage();
@@ -39,6 +46,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мій профіль</title>
     <link rel="stylesheet" href="css/styles.css">
+    <script src="js/profile.js" defer></script>
 </head>
 <body>
     <?php include 'templates/sidebar.html'; ?>

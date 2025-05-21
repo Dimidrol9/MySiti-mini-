@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (isset($_SESSION['user_id'])) {
-    header("Location: dashboard.php");
+    header("Location: home.php");
     exit;
 }
 ?>
@@ -12,7 +12,7 @@ if (isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Реєстрація</title>
     <link rel="stylesheet" href="css/styles.css">
-    <script src="js/register.js" defer></script>
+    
 </head>
 <body>
     <div class="wrapper">

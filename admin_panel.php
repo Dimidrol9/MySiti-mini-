@@ -51,15 +51,19 @@ try {
         }
     }
 
-    // Видалення користувача
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
-        $user_id = (int)$_POST['user_id'];
-        if ($user_id === $_SESSION['user_id']) {
-            $message = "Ви не можете видалити власний обліковий запис!";
-        } else {
-            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-            $stmt->execute([$user_id]);
-            $message = "Користувача успішно видалено!";
+    $user_id = (int)$_POST['user_id'];
+    if ($user_id === $_SESSION['user_id']) {
+        $message = "Ви не можете видалити власний обліковий запис!";
+    } else {
+        // Спочатку видаляємо записи з activity_logs
+        $stmt = $pdo->prepare("DELETE FROM activity_logs WHERE user_id = ?");
+        $stmt->execute([$user_id]);
+        
+        // Потім видаляємо користувача
+        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+        $stmt->execute([$user_id]);
+        $message = "Користувача успішно видалено!";
         }
     }
 

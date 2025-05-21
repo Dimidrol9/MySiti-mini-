@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("INSERT INTO user_activity (user_id, last_active) VALUES (?, NOW()) ON DUPLICATE KEY UPDATE last_active = NOW()");
             $stmt->execute([$user['id']]);
 
-            header("Location: dashboard.php");
+            header("Location: home.php");
             exit;
         } else {
             $error_message = "Невірний email або пароль!";
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вхід</title>
     <link rel="stylesheet" href="css/styles.css">
-    <script src="js/login.js" defer></script>
+    
 </head>
 <body>
     <div class="wrapper">

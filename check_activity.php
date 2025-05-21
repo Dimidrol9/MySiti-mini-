@@ -1,53 +1,85 @@
 <?php
 session_start();
+
+header('Content-Type: application/json');
+
+// Перевіряємо, чи авторизований користувач
 if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['status' => 'error', 'message' => 'Неавторизований користувач']);
+    echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
     exit;
 }
 
-try {
-    $pdo = new PDO("mysql:host=localhost;dbname=auth_db", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+// Отримуємо або повертаємо питання
+$questions = [
+    'Ви ще тут?' => 'Так',
+    'Все гаразд?' => 'Так',
+    'Продовжуємо працювати?' => 'Так',
+    'Ви активні?' => 'Так',
+    'Ще не пішли?' => 'Ні'
+];
 
-    // Перевірка часу останньої активності
-    $stmt = $pdo->prepare("SELECT last_active FROM user_activity WHERE user_id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-    $activity = $stmt->fetch();
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // Вибираємо випадкове питання
+    $question_keys = array_keys($questions);
+    $random_index = array_rand($question_keys);
+    $current_question = $question_keys[$random_index];
+    $correct_answer = $questions[$current_question];
 
-    if ($activity) {
-        $last_active = strtotime($activity['last_active']);
-        $current_time = time();
-        $inactive_threshold = 1800; // 30 хвилин у секундах
+    // Зберігаємо в сесії
+    $_SESSION['activity_question'] = $current_question;
+    $_SESSION['activity_answer'] = $correct_answer;
+    $_SESSION['activity_start_time'] = time();
 
-        if (($current_time - $last_active) > $inactive_threshold) {
-            // Логування завершення сесії
-            $stmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action) VALUES (?, 'timeout')");
-            $stmt->execute([$_SESSION['user_id']]);
-            session_destroy();
-            http_response_code(401);
-            echo json_encode(['status' => 'error', 'message' => 'Сесію завершено через неактивність']);
-            exit;
+    echo json_encode(['status' => 'success', 'question' => $current_question]);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['answer'])) {
+    $user_answer = $_POST['answer'];
+    $response_time = time() - $_SESSION['activity_start_time'];
+
+    try {
+        $pdo = new PDO("mysql:host=localhost;dbname=auth_db", "root", "");
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Оновлення активності
+        $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM user_activity WHERE user_id = ?");
+        $check_stmt->execute([$_SESSION['user_id']]);
+        $exists = $check_stmt->fetchColumn();
+
+        if (!isset($_SESSION['email'])) {
+            $stmt_email = $pdo->prepare("SELECT email FROM users WHERE id = ?");
+            $stmt_email->execute([$_SESSION['user_id']]);
+            $_SESSION['email'] = $stmt_email->fetchColumn();
         }
-    } else {
-        // Якщо запису немає, створюємо його
-        $stmt = $pdo->prepare("INSERT INTO user_activity (user_id, last_active) VALUES (?, NOW())");
-        $stmt->execute([$_SESSION['user_id']]);
+
+        if ($exists) {
+            $stmt = $pdo->prepare("UPDATE user_activity SET last_active = NOW(), email = ? WHERE user_id = ?");
+            $stmt->execute([$_SESSION['email'], $_SESSION['user_id']]);
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO user_activity (user_id, last_active, email) VALUES (?, NOW(), ?)");
+            $stmt->execute([$_SESSION['user_id'], $_SESSION['email']]);
+        }
+
+        // Логування
+        $log_details = json_encode([
+            'question' => $_SESSION['activity_question'],
+            'user_answer' => $user_answer,
+            'correct_answer' => $_SESSION['activity_answer'],
+            'response_time' => $response_time
+        ]);
+        error_log("Активність користувача ID {$_SESSION['user_id']}: $log_details");
+
+        if ($user_answer === $_SESSION['activity_answer']) {
+            $_SESSION['last_auth'] = time();
+            echo json_encode(['status' => 'success', 'message' => 'Activity verified']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Неправильна відповідь']);
+        }
+    } catch (PDOException $e) {
+        error_log("Помилка: " . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => 'Server error']);
     }
-
-    // Оновлення часу активності
-    $stmt = $pdo->prepare("UPDATE user_activity SET last_active = NOW() WHERE user_id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-
-    // Логування перевірки активності
-    $stmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action) VALUES (?, 'activity_check')");
-    $stmt->execute([$_SESSION['user_id']]);
-
-    echo json_encode(['status' => 'success']);
-} catch (PDOException $e) {
-    // Логування помилки
-    error_log("Помилка в check_activity.php: " . $e->getMessage(), 3, "C:/xampp/htdocs/auth_app/logs/error.log");
-    http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => 'Помилка бази даних']);
+    exit;
 }
 ?>
